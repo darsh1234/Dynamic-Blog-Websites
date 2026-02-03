@@ -1,0 +1,51 @@
+{
+  "family": "go-gin-blog-backend",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/goGinBlogTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "backend",
+      "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/go-gin-blog-backend:<TAG>",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "APP_ENV", "value": "staging" },
+        { "name": "PORT", "value": "8080" },
+        { "name": "DATABASE_URL", "value": "postgres://<USER>:<PASS>@<RDS_ENDPOINT>:5432/blog_platform?sslmode=require" },
+        { "name": "JWT_ACCESS_TTL_MINUTES", "value": "15" },
+        { "name": "JWT_REFRESH_TTL_HOURS", "value": "168" },
+        { "name": "PASSWORD_RESET_TTL_MINUTES", "value": "30" },
+        { "name": "EMAIL_PROVIDER", "value": "ses" },
+        { "name": "EMAIL_FROM", "value": "no-reply@example.com" },
+        { "name": "AWS_REGION", "value": "us-east-1" },
+        { "name": "AWS_SES_FROM_ARN", "value": "arn:aws:ses:us-east-1:<ACCOUNT_ID>:identity/no-reply@example.com" },
+        { "name": "CORS_ALLOWED_ORIGINS", "value": "https://blog-a.example.com,https://blog-b.example.com" },
+        { "name": "APP_VARIANT", "value": "blog_a" },
+        { "name": "FRONTEND_BASE_URL", "value": "https://blog-a.example.com" },
+        { "name": "REQUEST_TIMEOUT_SECONDS", "value": "10" }
+      ],
+      "secrets": [
+        { "name": "JWT_ACCESS_SECRET", "valueFrom": "arn:aws:ssm:<REGION>:<ACCOUNT_ID>:parameter/go-gin-blog/JWT_ACCESS_SECRET" },
+        { "name": "JWT_REFRESH_SECRET", "valueFrom": "arn:aws:ssm:<REGION>:<ACCOUNT_ID>:parameter/go-gin-blog/JWT_REFRESH_SECRET" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/go-gin-blog-backend",
+          "awslogs-region": "<REGION>",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
