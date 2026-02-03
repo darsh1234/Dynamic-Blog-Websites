@@ -1,31 +1,23 @@
 # Go_Gin_Blog_Platform
 
-A localhost-first, AWS-cloud-ready blog platform built to demonstrate production-oriented Go backend work.
+A full-stack blog platform with a Go (Gin) backend, React frontend, and PostgreSQL.
 
 ## Stack
 - Backend: Go, Gin, PostgreSQL, JWT, structured logging
 - Frontend: React + Vite
 - Containers: Docker / Docker Compose
-- Cloud target: AWS ECR + ECS (backend), Elastic Beanstalk (frontend), RDS PostgreSQL
+- Deployment docs: AWS ECR + ECS (backend), Elastic Beanstalk (frontend), RDS PostgreSQL
 
-## Implemented in This Folder
+## Features
 - Monorepo structure (`backend`, `frontend`, `docs`)
-- Backend Go API with:
-  - `/api/v1/healthz` with database ping check
-  - Implemented auth endpoints (`register`, `login`, `refresh`, `logout`, password reset request/confirm)
-  - Role middleware for protected routes
-  - Implemented posts CRUD + pagination with ownership checks
-  - Implemented admin users list + role update endpoints
-  - Standard error envelope for API failures
-- Frontend baseline with:
-  - auth pages (login/register/forgot/reset)
-  - posts dashboard (list/create/edit/delete with pagination)
-  - admin user-role management screen
-  - token refresh retry behavior on `401`
-- Config + logging + PostgreSQL connection bootstrap
-- Initial PostgreSQL SQL migration files
-- Dockerfiles (backend + frontend) + docker-compose (postgres + backend + frontend)
-- Detailed design and AWS mapping documents
+- JWT auth (`register`, `login`, `refresh`, `logout`)
+- Password reset request/confirm
+- Role-based authorization (`reader`, `author`, `admin`)
+- Posts CRUD with pagination and ownership checks
+- Admin user listing and role update endpoints
+- Structured API error responses
+- React UI for auth, posts, and admin user-role management
+- Docker Compose setup for local Postgres + backend + frontend
 
 ## Monorepo Layout
 ```text
@@ -49,15 +41,15 @@ Go_Gin_Blog_Platform/
   docker-compose.yml
 ```
 
-## Quick Start (Local Full Stack)
+## Local Setup
 
-### Option A: Run with Docker Compose
+### Run with Docker Compose
 ```bash
 cd Go_Gin_Blog_Platform
 docker compose up --build
 ```
 
-Apply initial schema migration once PostgreSQL is up:
+Apply schema migration:
 ```bash
 docker compose exec -T postgres psql -U postgres -d blog_platform < backend/migrations/000001_init.up.sql
 ```
@@ -71,11 +63,19 @@ Backend health check:
 curl http://localhost:8080/api/v1/healthz
 ```
 
-### Option B: Run backend directly
+### Run services directly (optional)
+Backend:
 ```bash
 cd Go_Gin_Blog_Platform/backend
 psql "postgres://postgres:postgres@localhost:5432/blog_platform?sslmode=disable" < migrations/000001_init.up.sql
 go run ./cmd/api
+```
+
+Frontend:
+```bash
+cd Go_Gin_Blog_Platform/frontend
+npm install
+npm run dev
 ```
 
 ## API Surface (`/api/v1`)
@@ -95,12 +95,6 @@ go run ./cmd/api
 - Admin:
   - `GET /admin/users`
   - `PATCH /admin/users/:id/role`
-
-Current implementation status:
-- Auth endpoints are implemented and return token pairs.
-- Posts CRUD + pagination endpoints are implemented.
-- Admin user management endpoints are implemented.
-- React frontend baseline is implemented and wired to backend API contracts.
 
 ## Validation Commands
 Backend:
@@ -127,15 +121,7 @@ Backend env examples are in:
 Frontend env examples are in:
 - `Go_Gin_Blog_Platform/frontend/.env.example`
 
-## Core Documentation
+## Additional Docs
 - Design and setup: `Go_Gin_Blog_Platform/docs/design-setup.md`
 - AWS deployment mapping: `Go_Gin_Blog_Platform/docs/aws-deployment-mapping.md`
 - Deployment artifacts: `Go_Gin_Blog_Platform/docs/deployment/`
-
-## Project Highlights
-This project demonstrates:
-- Gin REST API design
-- JWT + roles + password reset flow
-- PostgreSQL migration strategy
-- Dockerized local workflow
-- AWS-targeted deployment model (ECS/EB/RDS)
